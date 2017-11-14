@@ -1,7 +1,8 @@
 FROM node:8-alpine
 
 WORKDIR /app
-COPY src .
-RUN npm install
+COPY dist ./dist
+COPY package.json .
+RUN npm install --production
 
-CMD ["node", "bot.js"]
+CMD ["node", "dist/bot.js"]

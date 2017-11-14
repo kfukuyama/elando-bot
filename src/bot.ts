@@ -36,25 +36,35 @@ if (!process.env.clientId || !process.env.clientSecret || !process.env.PORT) {
   process.exit(1);
 }
 
-var Botkit = require('botkit');
-var debug = require('debug')('botkit:main');
+import * as Botkit from 'botkit';
+const debug = require('debug')('botkit:main');
 
-var bot_options = {
-    clientId: process.env.clientId,
-    clientSecret: process.env.clientSecret,
-    debug: true,
-    scopes: ['bot'],
-    // studio_token: process.env.studio_token,
-    // studio_command_uri: process.env.studio_command_uri
+import { setupUserRegistration } from './web/components/user_registration';
+import { setupExpress } from './web/components/express_webserver';
+import { setupOnBoarding } from './web/components/onboarding';
+import { setupDialogSubmissionSkill } from './web/skills/dialog_submissions';
+import { setupHearsSkill } from './web/skills/hears';
+import { setupInteractiveMessagesSkill } from './web/skills/interactive_messages';
+import { SlackConfiguration } from 'botkit';
+
+var bot_options: SlackConfiguration = {
+  clientId: process.env.clientId,
+  clientSecret: process.env.clientSecret,
+  debug: true,
+  scopes: ['bot'],
+  storage: undefined,
+  json_file_store: undefined,
+  // studio_token: process.env.studio_token,
+  // studio_command_uri: process.env.studio_command_uri
 };
 
 // Use a mongo database if specified, otherwise store in a JSON file local to the app.
 // Mongo is automatically configured when deploying to Heroku
 if (process.env.MONGO_URI) {
-    var mongoStorage = require('botkit-storage-mongo')({mongoUri: process.env.MONGO_URI});
-    bot_options.storage = mongoStorage;
+  var mongoStorage = require('botkit-storage-mongo')({ mongoUri: process.env.MONGO_URI });
+  bot_options.storage = mongoStorage;
 } else {
-    bot_options.json_file_store = __dirname + '/.data/db/'; // store user data in a simple JSON format
+  bot_options.json_file_store = __dirname + '/.data/db/'; // store user data in a simple JSON format
 }
 
 // Create the Botkit controller, which controls all instances of the bot.
@@ -63,32 +73,32 @@ var controller = Botkit.slackbot(bot_options);
 controller.startTicking();
 
 // Set up an Express-powered webserver to expose oauth and webhook endpoints
-var webserver = require(__dirname + '/web/components/express_webserver.js')(controller);
+const server = setupExpress(controller);
 
 // Set up a simple storage backend for keeping a record of customers
 // who sign up for the app via the oauth
-require(__dirname + '/web/components/user_registration.js')(controller);
+setupUserRegistration(controller);
 
 // Send an onboarding message when a new team joins
-require(__dirname + '/web/components/onboarding.js')(controller);
+setupOnBoarding(controller);
 
-// Load in some helpers that make running Botkit on Glitch.com better
-require(__dirname + '/web/components/plugin_glitch.js')(controller);
+// Setup Skills
+setupDialogSubmissionSkill(controller);
+setupHearsSkill(controller);
+setupInteractiveMessagesSkill(controller);
 
-// enable advanced botkit studio metrics
-require('botkit-studio-metrics')(controller);
+server.listen(+process.env.PORT || 3000, null, function () {
 
-var normalizedPath = require("path").join(__dirname, "./web/skills");
-require("fs").readdirSync(normalizedPath).forEach(function(file) {
-  require("./web/skills/" + file)(controller);
+  debug('Express webserver configured and listening at http://localhost:' + process.env.PORT || 3000);
+
 });
 
 function usage_tip() {
-    console.log('~~~~~~~~~~');
-    console.log('Botkit Starter Kit');
-    console.log('Execute your bot application like this:');
-    console.log('clientId=<MY SLACK CLIENT ID> clientSecret=<MY CLIENT SECRET> PORT=3000 studio_token=<MY BOTKIT STUDIO TOKEN> node bot.js');
-    console.log('Get Slack app credentials here: https://api.slack.com/apps')
-    console.log('Get a Botkit Studio token here: https://studio.botkit.ai/')
-    console.log('~~~~~~~~~~');
+  console.log('~~~~~~~~~~');
+  console.log('Botkit Starter Kit');
+  console.log('Execute your bot application like this:');
+  console.log('clientId=<MY SLACK CLIENT ID> clientSecret=<MY CLIENT SECRET> PORT=3000 studio_token=<MY BOTKIT STUDIO TOKEN> node bot.js');
+  console.log('Get Slack app credentials here: https://api.slack.com/apps')
+  console.log('Get a Botkit Studio token here: https://studio.botkit.ai/')
+  console.log('~~~~~~~~~~');
 }

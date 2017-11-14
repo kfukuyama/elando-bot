@@ -9,7 +9,7 @@ respond immediately with a single line response.
 
 */
 
-module.exports = function (controller) {
+export function setupHearsSkill(controller) {
 
     controller.hears(['^hi', '^hello'], 'direct_message,direct_mention', function (bot, message) {
 
@@ -19,17 +19,17 @@ module.exports = function (controller) {
                 callback_id: '123',
                 attachment_type: 'default',
                 actions: [{
-                        "name": "create",
-                        "text": "Create Account",
-                        "value": "create",
-                        "type": "button",
-                    },
-                    {
-                        "name": "no",
-                        "text": "No Thanks",
-                        "value": "no",
-                        "type": "button",
-                    }
+                    "name": "create",
+                    "text": "Create Account",
+                    "value": "create",
+                    "type": "button",
+                },
+                {
+                    "name": "no",
+                    "text": "No Thanks",
+                    "value": "no",
+                    "type": "button",
+                }
                 ]
             }]
         });

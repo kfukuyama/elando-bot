@@ -1,6 +1,6 @@
 var debug = require('debug')('botkit:dialog_submissions');
 
-module.exports = function (controller) {
+export function setupDialogSubmissionSkill(controller) {
     // use a receive middleware hook to validate a form submission
     // and use bot.dialogError to respond with an error before the submission
     // can be sent to the handler

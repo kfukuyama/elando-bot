@@ -1,6 +1,6 @@
 var debug = require('debug')('botkit:interactive_messages');
 
-module.exports = function (controller) {
+export function setupInteractiveMessagesSkill(controller) {
 
     // launch a dialog from a button click
     controller.on('interactive_message_callback', function (bot, trigger) {

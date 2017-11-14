@@ -1,6 +1,8 @@
+import { SlackController } from "botkit";
+
 var debug = require('debug')('botkit:user_registration');
 
-module.exports = function (controller) {
+export function setupUserRegistration(controller) {
 
     /* Handle event caused by a user logging in with oauth */
     controller.on('oauth:success', function (payload) {
