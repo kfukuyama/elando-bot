@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+  elando-bot:
+    build: ./.
+    image: elandos/elando-bot
+    ports:
+      - 3000:3000
+    volumes:
+      - ./src:/app
+    environment:
+      token: 'xoxb-269081400037-qTI7YFVYHxK2oxL56gtfbB6i'
+      clientId: '248254297718.269077168661'
+      clientSecret: '57300389b635a0c245d63f348ef62072'
+      PORT: 3000
+      DEBUG: '*'
